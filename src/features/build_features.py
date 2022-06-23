@@ -96,5 +96,15 @@ def GLRLM_feature(image, distance=2):
 def LBP_image(image, r, method='default'):
   n_points = 8 * r
   lbp = local_binary_pattern(image, n_points, r, method=method)
-  h_img, _ = np.histogram(lbp.ravel(), bins=np.arange(0, n_points + 1))
+  h_img, _ = np.histogram(lbp.ravel(),
+                          bins=np.arange(0, n_points + 3),
+                          range=(0, n_points + 2))
+  h_img = h_img.astype(np.float)
+  h_img = h_img / (h_img.sum(dtype=np.float) + 1e-7)
   return lbp, h_img
+
+def get_histogram(image):
+  h_img, _ = np.histogram(image.ravel(), bins=np.arange(0, 256 + 1))
+  h_img = h_img.astype(np.float)
+  h_img = h_img / (h_img.sum(dtype=np.float) + 1e-7)
+  return h_img
