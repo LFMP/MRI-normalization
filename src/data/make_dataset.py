@@ -1,8 +1,13 @@
 import os
+import sys
 
 import cv2
 import numpy as np
 import pandas as pd
+
+sys.path.append(os.path.dirname(os.path.abspath('./')))
+
+from src.features.build_features import *
 
 
 def get_valid_cases(path, label):
@@ -59,7 +64,7 @@ def get_dataset(path, split_ratio):
   return train_df, val_df
 
 
-def make_dataset(path):
+def make_interim_dataset(path):
   """
   Make the dataset from the given path.
   """
@@ -104,3 +109,49 @@ def make_dataset(path):
            X_val=X_val,
            Y_val=Y_val,
            Z_val=Z_val)
+
+
+def make_LBP_dataset(path):
+  """
+  Make the dataset from the given path.
+  """
+  train_npz = np.load(os.path.join(path, 'iterim', 'train.npz'),
+                      allow_pickle=True)
+  val_npz = np.load(os.path.join(path, 'iterim', 'val.npz'), allow_pickle=True)
+  X_train, Y_train, Z_train = train_npz['X_train'], train_npz[
+      'Y_train'], train_npz['Z_train']
+  X_val, Y_val, Z_val = val_npz['X_val'], val_npz['Y_val'], val_npz['Z_val']
+
+  X_train_lbp = []
+  X_train_masked_lbp = []
+
+  X_val_lbp = []
+  X_val_masked_lbp = []
+
+  for index, image in enumerate(X_train):
+    lbp, hist = LBP_image(get_equalized_hist_image(image), 2)
+    lbp_masked = get_histogram(lbp * Z_train[index])
+    X_train_lbp.append(hist)
+    X_train_masked_lbp.append(lbp_masked)
+
+  np.savez(os.path.join(path, 'processed', 'train_lbp.npz'),
+           X_train=X_train_lbp,
+           Y_train=Y_train)
+
+  np.savez(os.path.join(path, 'processed', 'train_masked_lbp.npz'),
+           X_train=X_train_masked_lbp,
+           Y_train=Y_train)
+
+  for index, image in enumerate(X_val):
+    lbp, hist = LBP_image(get_equalized_hist_image(image), 2)
+    lbp_masked = get_histogram(lbp * Z_val[index])
+    X_val_lbp.append(hist)
+    X_val_masked_lbp.append(lbp_masked)
+
+  np.savez(os.path.join(path, 'processed', 'val_lbp.npz'),
+           X_val=X_val_lbp,
+           Y_val=Y_val)
+
+  np.savez(os.path.join(path, 'processed', 'val_masked_lbp.npz'),
+           X_val=X_val_masked_lbp,
+           Y_val=Y_val)
