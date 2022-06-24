@@ -5,9 +5,7 @@ import cv2
 import numpy as np
 import pandas as pd
 
-sys.path.append(
-    os.path.dirname(
-        os.path.abspath('/home/lfmp/unicamp/datasci4health-A11/src')))
+sys.path.append(os.path.dirname(os.path.abspath('./')))
 
 from src.features.build_features import *
 
@@ -143,7 +141,7 @@ def make_LBP_dataset(path, R):
            X_train=X_train_lbp,
            Y_train=Y_train)
 
-  np.savez(os.path.join(path, 'processed', f'train_masked_lbp_{R}.npz'),
+  np.savez(os.path.join(path, 'processed', f'train_masked_lbp_R_{R}.npz'),
            X_train=X_train_masked_lbp,
            Y_train=Y_train)
 
