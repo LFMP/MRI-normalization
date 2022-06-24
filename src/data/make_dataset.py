@@ -5,7 +5,9 @@ import cv2
 import numpy as np
 import pandas as pd
 
-sys.path.append(os.path.dirname(os.path.abspath('./')))
+sys.path.append(
+    os.path.dirname(
+        os.path.abspath('/home/lfmp/unicamp/datasci4health-A11/src')))
 
 from src.features.build_features import *
 
@@ -111,7 +113,7 @@ def make_interim_dataset(path):
            Z_val=Z_val)
 
 
-def make_LBP_dataset(path):
+def make_LBP_dataset(path, R):
   """
   Make the dataset from the given path.
   """
@@ -129,29 +131,35 @@ def make_LBP_dataset(path):
   X_val_masked_lbp = []
 
   for index, image in enumerate(X_train):
-    lbp, hist = LBP_image(get_equalized_hist_image(image), 2)
-    lbp_masked = get_histogram(lbp * Z_train[index])
+    lbp, hist = LBP_image(get_equalized_hist_image(image), R)
+    lbp_masked = lbp * Z_train[index]
+    h_lbp_masked, _ = np.histogram(lbp_masked.ravel(),
+                                   bins=np.arange(0, 256 + 1),
+                                   weights=Z_train[index].ravel())
     X_train_lbp.append(hist)
-    X_train_masked_lbp.append(lbp_masked)
+    X_train_masked_lbp.append(h_lbp_masked)
 
-  np.savez(os.path.join(path, 'processed', 'train_lbp.npz'),
+  np.savez(os.path.join(path, 'processed', f'train_lbp_R_{R}.npz'),
            X_train=X_train_lbp,
            Y_train=Y_train)
 
-  np.savez(os.path.join(path, 'processed', 'train_masked_lbp.npz'),
+  np.savez(os.path.join(path, 'processed', f'train_masked_lbp_{R}.npz'),
            X_train=X_train_masked_lbp,
            Y_train=Y_train)
 
   for index, image in enumerate(X_val):
-    lbp, hist = LBP_image(get_equalized_hist_image(image), 2)
-    lbp_masked = get_histogram(lbp * Z_val[index])
+    lbp, hist = LBP_image(get_equalized_hist_image(image), R)
+    lbp_masked = lbp * Z_val[index]
+    h_lbp_masked, _ = np.histogram(lbp_masked.ravel(),
+                                   bins=np.arange(0, 256 + 1),
+                                   weights=Z_val[index].ravel())
     X_val_lbp.append(hist)
-    X_val_masked_lbp.append(lbp_masked)
+    X_val_masked_lbp.append(h_lbp_masked)
 
-  np.savez(os.path.join(path, 'processed', 'val_lbp.npz'),
+  np.savez(os.path.join(path, 'processed', f'val_lbp_R_{R}.npz'),
            X_val=X_val_lbp,
            Y_val=Y_val)
 
-  np.savez(os.path.join(path, 'processed', 'val_masked_lbp.npz'),
+  np.savez(os.path.join(path, 'processed', f'val_masked_lbp_R_{R}.npz'),
            X_val=X_val_masked_lbp,
            Y_val=Y_val)
