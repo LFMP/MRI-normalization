@@ -9,23 +9,14 @@ from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
 from sklearn.preprocessing import MinMaxScaler
 
 
-def get_lbp_with_mask_feature(image, mask, P, R):
+def get_lbp_with_mask_feature(image, mask, R):
   """
   Get the LBP feature of the given image.
   """
-  dim = 2**P
-  h_bins = np.arange(35)
-  # h_bins = np.arange(dim + 1)
-  h_range = (0, dim)
-  lbp = local_binary_pattern(image, P, R, method='default')
-  lbp_mask = lbp * mask
-  h_img, _ = np.histogram(lbp.ravel(), bins=h_bins, range=h_range)
-  h_masked, _ = np.histogram(lbp[mask], bins=h_bins, range=h_range)
+  P = R * 8
+  lbp_mask = local_binary_pattern(image * mask, P, R, method='default')
 
-  h_img = h_img / h_img.sum(dtype=np.float)
-  h_masked = h_masked / h_masked.sum(dtype=np.float)
-
-  return lbp_mask, h_masked
+  return lbp_mask
 
 
 def get_equalized_hist_image(image):
@@ -99,12 +90,13 @@ def LBP_image(image, r, method='default'):
   h_img, _ = np.histogram(lbp.ravel(),
                           bins=np.arange(0, n_points + 3),
                           range=(0, n_points + 2))
-  h_img = h_img.astype(np.float)
-  h_img = h_img / (h_img.sum(dtype=np.float) + 1e-7)
+  h_img = h_img.astype(float)
+  h_img = h_img / (h_img.sum(dtype=float) + 1e-7)
   return lbp, h_img
+
 
 def get_histogram(image):
   h_img, _ = np.histogram(image.ravel(), bins=np.arange(0, 256 + 1))
-  h_img = h_img.astype(np.float)
-  h_img = h_img / (h_img.sum(dtype=np.float) + 1e-7)
+  h_img = h_img.astype(float)
+  h_img = h_img / (h_img.sum(dtype=float) + 1e-7)
   return h_img
