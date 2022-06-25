@@ -132,7 +132,7 @@ def make_LBP_dataset(path, R):
     lbp, hist = LBP_image(get_equalized_hist_image(image), R)
     lbp_masked = lbp * Z_train[index]
     h_lbp_masked, _ = np.histogram(lbp_masked.ravel(),
-                                   bins=np.arange(0, 256 + 1),
+                                   bins=np.arange(0, (8 * R) + 3),
                                    weights=Z_train[index].ravel())
     X_train_lbp.append(hist)
     X_train_masked_lbp.append(h_lbp_masked)
@@ -149,7 +149,7 @@ def make_LBP_dataset(path, R):
     lbp, hist = LBP_image(get_equalized_hist_image(image), R)
     lbp_masked = lbp * Z_val[index]
     h_lbp_masked, _ = np.histogram(lbp_masked.ravel(),
-                                   bins=np.arange(0, 256 + 1),
+                                   bins=np.arange(0, (8 * R) + 3),
                                    weights=Z_val[index].ravel())
     X_val_lbp.append(hist)
     X_val_masked_lbp.append(h_lbp_masked)
