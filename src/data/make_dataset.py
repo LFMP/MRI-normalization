@@ -170,6 +170,7 @@ def make_LBP_dataset(path, R):
 def make_dataset_test(path, R):
   df = get_valid_cases(os.path.join(path, 'test'), None)
   x_test, z_test = df['image_path'], df['mask_path']
+  patient = df['patient']
   X_test, X_test_lbp, X_test_masked_lbp = [], [], []
   Z_test = []
 
@@ -184,6 +185,7 @@ def make_dataset_test(path, R):
 
   np.savez(os.path.join(path, 'iterim', 'test.npz'),
            X_test=X_test,
+           patient=patient,
            Z_test=Z_test)
 
   for index, image in enumerate(X_test):
@@ -199,8 +201,10 @@ def make_dataset_test(path, R):
 
   np.savez(os.path.join(path, 'processed', f'test_lbp_R_{R}.npz'),
            X_test=X_test_lbp,
+           patient=patient,
            Z_test=Z_test)
 
   np.savez(os.path.join(path, 'processed', f'test_masked_lbp_R_{R}.npz'),
            X_test=X_test_masked_lbp,
+           patient=patient,
            Z_test=Z_test)
