@@ -83,7 +83,7 @@ def make_interim_dataset(path):
 
   for im_path in z_train:
     im_mask = np.array(cv2.imread(im_path, cv2.IMREAD_UNCHANGED))
-    _, im_mask = cv2.threshold(im_mask, 0, 255,
+    _, im_mask = cv2.threshold(im_mask, 0, 1,
                                cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     Z_train.append(im_mask)
 
@@ -99,7 +99,7 @@ def make_interim_dataset(path):
 
   for im_path in z_val:
     im_mask = np.array(cv2.imread(im_path, cv2.IMREAD_UNCHANGED))
-    _, im_mask = cv2.threshold(im_mask, 0, 255,
+    _, im_mask = cv2.threshold(im_mask, 0, 1,
                                cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     Z_val.append(im_mask)
 
@@ -165,3 +165,42 @@ def make_LBP_dataset(path, R):
   np.savez(os.path.join(path, 'processed', f'val_masked_lbp_R_{R}.npz'),
            X_val=X_val_masked_lbp,
            Y_val=Y_val)
+
+
+def make_dataset_test(path, R):
+  df = get_valid_cases(os.path.join(path, 'test'), None)
+  x_test, z_test = df['image_path'], df['mask_path']
+  X_test, X_test_lbp, X_test_masked_lbp = [], [], []
+  Z_test = []
+
+  for im_path in x_test:
+    X_test.append(np.array(cv2.imread(im_path, 0)))
+
+  for im_path in z_test:
+    im_mask = np.array(cv2.imread(im_path, cv2.IMREAD_UNCHANGED))
+    _, im_mask = cv2.threshold(im_mask, 0, 1,
+                               cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    Z_test.append(im_mask)
+
+  np.savez(os.path.join(path, 'iterim', 'test.npz'),
+           X_test=X_test,
+           Z_test=Z_test)
+
+  for index, image in enumerate(X_test):
+    lbp, hist = LBP_image(get_equalized_hist_image(image), R)
+    lbp_masked = lbp * Z_test[index]
+    h_lbp_masked, _ = np.histogram(lbp_masked.ravel(),
+                                   bins=np.arange(0, (8 * R) + 3),
+                                   weights=Z_test[index].ravel())
+    h_lbp_masked = h_lbp_masked.astype(float)
+    h_lbp_masked = h_lbp_masked / (h_lbp_masked.sum(dtype=float) + 1e-7)
+    X_test_lbp.append(hist)
+    X_test_masked_lbp.append(h_lbp_masked)
+
+  np.savez(os.path.join(path, 'processed', f'test_lbp_R_{R}.npz'),
+           X_test=X_test_lbp,
+           Z_test=Z_test)
+
+  np.savez(os.path.join(path, 'processed', f'test_masked_lbp_R_{R}.npz'),
+           X_test=X_test_masked_lbp,
+           Z_test=Z_test)
