@@ -129,5 +129,7 @@ dmypy.json
 .pyre/
 
 # Custom
+*.csv
 *.npz
 data/raw
+data/test
